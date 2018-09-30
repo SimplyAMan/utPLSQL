@@ -80,8 +80,6 @@ before_install:
   - git clone --depth=1 --branch=${SELFTESTING_BRANCH:-master} https://github.com/utPLSQL/utPLSQL.git $UTPLSQL_DIR
   # download latest utPLSQL-cli release
   - curl -Lk -o utPLSQL-cli.zip https://github.com/utPLSQL/utPLSQL-cli/releases/download/v${UTPLSQL_CLI_VERSION}/utPLSQL-cli.zip
-  # wait for DB to be ready
-  - time docker logs -f $ORACLE_VERSION | grep -m 1 "DATABASE IS READY TO USE!" --line-buffered
 
 
 install:
@@ -94,6 +92,8 @@ install:
   - sudo chmod -R 777 /dev/pdbs
 
 before_script:
+  # wait for DB to be ready
+  - if [[ ! $TRAVIS_TAG ]]; then time docker logs -f $ORACLE_VERSION | grep -m 1 "DATABASE IS READY TO USE!" --line-buffered; fi
   - if [[ ! $TRAVIS_TAG ]]; then bash .travis/install.sh; fi
   - if [[ ! $TRAVIS_TAG ]]; then bash .travis/install_utplsql_release.sh; fi
   - if [[ ! $TRAVIS_TAG ]]; then bash .travis/run_examples.sh; fi
